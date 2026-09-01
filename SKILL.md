@@ -1,7 +1,7 @@
 ---
 name: excalidraw-mcp
 description: Build Excalidraw diagrams through the official Excalidraw MCP and turn the same source into a real .excalidraw file on disk or an Obsidian .excalidraw.md drawing. Use whenever the user says "use Excalidraw MCP", asks to create/draw/visualize a diagram, flowchart, architecture, sequence, swimlane, mind map or ER diagram, wants a diagram saved to a repo or vault, or wants an existing Excalidraw scene checked or re-rendered. Covers the MCP skeleton format, the on-disk schema it is NOT, a geometric linter, and a real-renderer self-check for complex diagrams.
-version: 1.0.0
+version: 1.0.1
 license: MIT
 repository: anton-abyzov/excalidraw-mcp-skill
 mcp-deps: [excalidraw]
@@ -26,6 +26,25 @@ Second fact: hand-authored diagrams do not degrade gradually with size — they 
 **irregularity**. Measured on a real generated scene, elements produced by a repeating
 layout formula had a 0.00 defect rate; bespoke one-off elements had 0.71. So compute
 positions with a formula, and let the linter check the result.
+
+## Setup on a new machine
+
+Installing this skill does **not** install the MCP server — `mcp-deps` is a declaration
+that `vskill check` verifies, not an installer. Add the server once per machine:
+
+```bash
+claude mcp add --transport http --scope user excalidraw https://mcp.excalidraw.com
+```
+
+`--scope user` registers it for every project on that machine (written to
+`~/.claude.json`). Drop the flag for the current project only, or use
+`--scope project` to commit it to the repo's `.mcp.json` so teammates get it on clone.
+Verify with `claude mcp list`, or `vskill check excalidraw-mcp`.
+
+Without the MCP the skill still works for everything except the live inline render:
+`excalidraw_build.py` and `excalidraw_lint.py` are plain Python 3 with no dependencies
+and no network, so files and validation keep working. `excalidraw_render.py` additionally
+wants `pip install playwright && playwright install chromium`.
 
 ## Workflow
 
@@ -125,6 +144,8 @@ skeleton file on disk in sync, since that file is what builds and lints.
 
 ## Changelog
 
+- **1.0.1** — document MCP setup: installing the skill does not install the server;
+  added the `claude mcp add` one-liner and what still works without it.
 - **1.0.0** — first release. Replaces the file-only `excalidraw-diagram-generator`
   skill, whose templates emitted inline `text` on shapes and therefore opened as empty
   boxes.
